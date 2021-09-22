@@ -32,17 +32,32 @@ public class ExampleController {
                 .forEach(it -> LOG.info("ParamName: {}, ParamValue: {}", it.getKey(), it.getValue()));
 
         final HashMap<String, String> response = new HashMap<>();
-        response.put("exampleStatus", actuatorClient.getHealth());
+        response.put("health", actuatorClient.getHealth());
         return response;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/health2")
-    public Object getHealthWithQueryParams(@RequestParam(required = false) final Map<String, String> params) {
+    @RequestMapping(method = RequestMethod.GET, path = "/healthWithReqParam")
+    public Object getHealthWithReceivedQueryParams(@RequestParam(required = false) final Map<String, String> params) {
         final String param = params.entrySet().parallelStream()
                 .map(it -> String.format("%s=%s", it.getKey(), it.getValue()))
                 .collect(Collectors.joining("&"));
         final HashMap<String, String> response = new HashMap<>();
-        response.put("exampleStatus2", exampleClient.getHealth(param));
+        response.put("healthWithReqParam", exampleClient.getHealth(param));
+        return response;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "/healthWithoutReqParam")
+    public Object getHealthWithouReceivedQueryParams() {
+        final HashMap<String, String> params = new HashMap<>();
+        params.put("db", "PRD_PHO");
+        params.put("db1", "PRD_GLD");
+        params.put("db2", "PRD_RPP");
+        final String param = params.entrySet().parallelStream()
+                .map(it -> String.format("args_%1$s:%2$s=%1$s", it.getValue(), it.getKey()))
+                .collect(Collectors.joining("&"));
+        LOG.info("Request param: {}", param);
+        final HashMap<String, String> response = new HashMap<>();
+        response.put("healthWithoutReqParam", exampleClient.getHealth(param));
         return response;
     }
 
